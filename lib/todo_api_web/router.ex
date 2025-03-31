@@ -8,7 +8,9 @@ defmodule TodoApiWeb.Router do
   scope "/api", TodoApiWeb do
     pipe_through :api
 
-    resources "/users", UserController, except: [:new, :edit]
+    resources "/users", UserController, except: [:new, :edit, :create]
+    post "/auth/register", UserController, :register
+    post "/auth/login", UserController, :login
   end
 
   # Enable LiveDashboard and Swoosh mailbox preview in development

@@ -16,7 +16,7 @@ defmodule TodoApi.AccountsFixtures do
     {:ok, user} =
       attrs
       |> Enum.into(%{
-        hashed_password: "some hashed_password",
+        password: "some password",
         username: unique_user_username()
       })
       |> TodoApi.Accounts.create_user()

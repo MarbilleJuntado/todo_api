@@ -23,7 +23,7 @@ config :todo_api, TodoApiWeb.Endpoint,
   live_view: [signing_salt: "dGzWn3Nb"]
 
 # Guardian configuration
-config :todo_api, TodoApi.Accounts.Guardian,
+config :todo_api, TodoApi.Guardian,
   issuer: "todo_api",
   secret_key: System.get_env("GUARDIAN_SECRET_KEY")
 

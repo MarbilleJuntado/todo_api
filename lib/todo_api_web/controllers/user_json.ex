@@ -18,8 +18,18 @@ defmodule TodoApiWeb.UserJSON do
   defp data(%User{} = user) do
     %{
       id: user.id,
+      username: user.username
+    }
+  end
+
+  @doc """
+  Renders a single user with a valid token.
+  """
+  def user_token(%{user: user, token: token}) do
+    %{
+      id: user.id,
       username: user.username,
-      hashed_password: user.hashed_password
+      token: token
     }
   end
 end

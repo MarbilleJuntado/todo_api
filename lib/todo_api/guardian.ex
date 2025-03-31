@@ -1,5 +1,5 @@
-defmodule TodoApi.Accounts.Guardian do
-  use Guardian, otp_app: :auth_me
+defmodule TodoApi.Guardian do
+  use Guardian, otp_app: :todo_api
 
   alias TodoApi.Accounts
 

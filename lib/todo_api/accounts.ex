@@ -16,7 +16,7 @@ defmodule TodoApi.Accounts do
       nil ->
         Argon2.no_user_verify()
 
-        {:error, :invalid_credentials}
+        {:error, :not_found}
 
       user ->
         if Argon2.verify_pass(plain_text_password, user.hashed_password) do
@@ -38,6 +38,22 @@ defmodule TodoApi.Accounts do
   """
   def list_users do
     Repo.all(User)
+  end
+
+  @doc """
+  Gets a user by username.
+
+  ## Examples
+
+      iex> get_user_by_username("foo")
+      %User{}
+
+      iex> get_user_by_username("unknown")
+      nil
+
+  """
+  def get_user_by_username(username) when is_binary(username) do
+    Repo.get_by(User, username: username)
   end
 
   @doc """
@@ -70,7 +86,7 @@ defmodule TodoApi.Accounts do
   """
   def create_user(attrs \\ %{}) do
     %User{}
-    |> User.changeset(attrs)
+    |> User.register_changeset(attrs)
     |> Repo.insert()
   end
 

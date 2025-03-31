@@ -3,17 +3,18 @@ defmodule TodoApiWeb.UserControllerTest do
 
   import TodoApi.AccountsFixtures
 
+  alias TodoApi.Accounts
   alias TodoApi.Accounts.User
 
   @create_attrs %{
     username: "some username",
-    hashed_password: "some hashed_password"
+    password: "some password"
   }
   @update_attrs %{
     username: "some updated username",
-    hashed_password: "some updated hashed_password"
+    password: "some updated password"
   }
-  @invalid_attrs %{username: nil, hashed_password: nil}
+  @invalid_attrs %{username: 1234, password: 5678}
 
   setup %{conn: conn} do
     {:ok, conn: put_req_header(conn, "accept", "application/json")}
@@ -26,25 +27,48 @@ defmodule TodoApiWeb.UserControllerTest do
     end
   end
 
-  describe "create user" do
+  describe "register user" do
     test "renders user when data is valid", %{conn: conn} do
-      conn = post(conn, ~p"/api/users", user: @create_attrs)
+      conn = post(conn, ~p"/api/auth/register", @create_attrs)
       assert %{"id" => id} = json_response(conn, 201)["data"]
 
       conn = get(conn, ~p"/api/users/#{id}")
 
       assert %{
                "id" => ^id,
-               "hashed_password" => hashed_password,
                "username" => "some username"
              } = json_response(conn, 200)["data"]
 
-      assert true == Argon2.verify_pass("some hashed_password", hashed_password)
+      assert user = Accounts.get_user!(id)
+      assert user.username == "some username"
+      assert true == Argon2.verify_pass("some password", user.hashed_password)
     end
 
     test "renders errors when data is invalid", %{conn: conn} do
-      conn = post(conn, ~p"/api/users", user: @invalid_attrs)
+      conn = post(conn, ~p"/api/auth/register", @invalid_attrs)
       assert json_response(conn, 422)["errors"] != %{}
+    end
+  end
+
+  describe "login user" do
+    setup do
+      user = user_fixture()
+
+      %{user: user}
+    end
+
+    test "logs in successfully when credentials are valid", %{conn: conn, user: user} do
+      conn =
+        post(conn, ~p"/api/auth/login", %{username: user.username, password: "some password"})
+
+      assert %{"id" => id, "username" => username, "token" => _token} = json_response(conn, 200)
+      assert id == user.id
+      assert username == user.username
+    end
+
+    test "login fails when credentials are invalid", %{conn: conn} do
+      conn = post(conn, ~p"/api/auth/login", %{username: "foo", password: "foo"})
+      assert json_response(conn, 404)
     end
   end
 
@@ -59,11 +83,12 @@ defmodule TodoApiWeb.UserControllerTest do
 
       assert %{
                "id" => ^id,
-               "hashed_password" => hashed_password,
                "username" => "some updated username"
              } = json_response(conn, 200)["data"]
 
-      assert true == Argon2.verify_pass("some updated hashed_password", hashed_password)
+      assert user = Accounts.get_user!(id)
+      assert user.username == "some updated username"
+      assert true == Argon2.verify_pass("some updated password", user.hashed_password)
     end
 
     test "renders errors when data is invalid", %{conn: conn, user: user} do

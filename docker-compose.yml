@@ -29,6 +29,8 @@ services:
     command: mix test
     environment:
       MIX_ENV: test
+    env_file:
+      - .env
     volumes:
       - .:/app
     links:
