@@ -18,7 +18,6 @@ defmodule TodoApiWeb.Router do
   scope "/api", TodoApiWeb do
     pipe_through :api
 
-    resources "/users", UserController, except: [:new, :edit, :create]
     post "/auth/register", AuthController, :register
     post "/auth/login", AuthController, :login
   end
@@ -26,6 +25,7 @@ defmodule TodoApiWeb.Router do
   scope "/api", TodoApiWeb do
     pipe_through [:api, :auth]
 
+    resources "/users", UserController, only: [:show, :update]
     resources "/tasks", TaskController, except: [:new, :edit]
   end
 
