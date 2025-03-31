@@ -5,12 +5,28 @@ defmodule TodoApiWeb.Router do
     plug :accepts, ["json"]
   end
 
+  pipeline :auth do
+    plug Guardian.Plug.Pipeline,
+      module: TodoApi.Guardian,
+      error_handler: TodoApiWeb.AuthErrorHandler
+
+    plug Guardian.Plug.VerifyHeader
+    plug Guardian.Plug.EnsureAuthenticated
+    plug Guardian.Plug.LoadResource
+  end
+
   scope "/api", TodoApiWeb do
     pipe_through :api
 
     resources "/users", UserController, except: [:new, :edit, :create]
     post "/auth/register", UserController, :register
     post "/auth/login", UserController, :login
+  end
+
+  scope "/api", TodoApiWeb do
+    pipe_through [:api, :auth]
+
+    resources "/tasks", TaskController, except: [:new, :edit]
   end
 
   # Enable LiveDashboard and Swoosh mailbox preview in development

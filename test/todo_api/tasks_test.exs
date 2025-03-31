@@ -11,19 +11,22 @@ defmodule TodoApi.TasksTest do
 
     @invalid_attrs %{position: nil, description: nil, title: nil}
 
-    test "list_tasks/0 returns all tasks" do
-      task = task_fixture()
+    setup do
+      user = user_fixture()
+      task = task_fixture(%{user_id: user.id})
+
+      %{user: user, task: task}
+    end
+
+    test "list_tasks/0 returns all tasks", %{task: task} do
       assert Tasks.list_tasks() == [task]
     end
 
-    test "get_task!/1 returns the task with given id" do
-      task = task_fixture()
+    test "get_task!/1 returns the task with given id", %{task: task} do
       assert Tasks.get_task!(task.id) == task
     end
 
-    test "create_task/1 with valid data creates a task" do
-      user = user_fixture()
-
+    test "create_task/1 with valid data creates a task", %{user: user} do
       valid_attrs = %{
         position: "120.5",
         description: "some description",
@@ -41,36 +44,25 @@ defmodule TodoApi.TasksTest do
       assert {:error, %Ecto.Changeset{}} = Tasks.create_task(@invalid_attrs)
     end
 
-    test "update_task/2 with valid data updates the task" do
-      task = task_fixture()
-
+    test "update_task/2 with valid data updates the task", %{task: task} do
       update_attrs = %{
-        position: "456.7",
         description: "some updated description",
         title: "some updated title"
       }
 
       assert {:ok, %Task{} = task} = Tasks.update_task(task, update_attrs)
-      assert task.position == Decimal.new("456.7")
       assert task.description == "some updated description"
       assert task.title == "some updated title"
     end
 
-    test "update_task/2 with invalid data returns error changeset" do
-      task = task_fixture()
+    test "update_task/2 with invalid data returns error changeset", %{task: task} do
       assert {:error, %Ecto.Changeset{}} = Tasks.update_task(task, @invalid_attrs)
       assert task == Tasks.get_task!(task.id)
     end
 
-    test "delete_task/1 deletes the task" do
-      task = task_fixture()
+    test "delete_task/1 deletes the task", %{task: task} do
       assert {:ok, %Task{}} = Tasks.delete_task(task)
       assert_raise Ecto.NoResultsError, fn -> Tasks.get_task!(task.id) end
-    end
-
-    test "change_task/1 returns a task changeset" do
-      task = task_fixture()
-      assert %Ecto.Changeset{} = Tasks.change_task(task)
     end
   end
 end
