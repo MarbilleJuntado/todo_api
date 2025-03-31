@@ -1,4 +1,4 @@
-defmodule TodoApiWeb.AuthErrorHandler do
+defmodule TodoApiWeb.Plug.AuthErrorHandler do
   import Plug.Conn
 
   def auth_error(conn, {_type, _reason}, _opts) do

@@ -7,15 +7,16 @@ defmodule TodoApi.TasksFixtures do
   @doc """
   Generate a task.
   """
-  def task_fixture(attrs \\ %{}) do
-    {:ok, task} =
+  def task_fixture(user_id, attrs \\ %{}) do
+    attrs =
       attrs
       |> Enum.into(%{
-        description: "some description",
-        position: "120.5",
-        title: "some title"
+        "description" => "some description",
+        "title" => "some title"
       })
-      |> TodoApi.Tasks.create_task()
+
+    {:ok, task} =
+      TodoApi.Tasks.create_task(user_id, attrs)
 
     task
   end

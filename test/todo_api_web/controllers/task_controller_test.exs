@@ -1,30 +1,27 @@
 defmodule TodoApiWeb.TaskControllerTest do
   use TodoApiWeb.ConnCase
+  use ExUnit.Case, async: true
 
   alias TodoApi.Accounts
   alias TodoApi.Tasks
   alias TodoApi.Tasks.Task
 
   @create_attrs %{
-    position: "120.5",
     description: "some description",
     title: "some title"
   }
   @update_attrs %{
-    position: "456.7",
     description: "some updated description",
     title: "some updated title"
   }
-  @invalid_attrs %{position: nil, description: nil, title: nil}
+  @invalid_attrs %{description: 456, title: 789}
 
   setup %{conn: conn} do
     {:ok, user} = Accounts.create_user(%{"username" => "test", "password" => "1234"})
 
     {:ok, task} =
-      Tasks.create_task(%{
-        "user_id" => user.id,
+      Tasks.create_task(user.id, %{
         "description" => "some description",
-        "position" => "120.5",
         "title" => "some title"
       })
 
@@ -68,7 +65,7 @@ defmodule TodoApiWeb.TaskControllerTest do
       assert %{
                "id" => ^id,
                "description" => "some description",
-               "position" => "120.5",
+               "position" => "2.0",
                "title" => "some title"
              } = json_response(conn, 200)["data"]
     end
@@ -115,7 +112,6 @@ defmodule TodoApiWeb.TaskControllerTest do
       assert %{
                "id" => ^id,
                "description" => "some updated description",
-               "position" => "456.7",
                "title" => "some updated title"
              } = json_response(conn, 200)["data"]
     end

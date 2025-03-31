@@ -8,11 +8,12 @@ defmodule TodoApiWeb.Router do
   pipeline :auth do
     plug Guardian.Plug.Pipeline,
       module: TodoApi.Guardian,
-      error_handler: TodoApiWeb.AuthErrorHandler
+      error_handler: TodoApiWeb.Plug.AuthErrorHandler
 
     plug Guardian.Plug.VerifyHeader
     plug Guardian.Plug.EnsureAuthenticated
     plug Guardian.Plug.LoadResource
+    plug TodoApiWeb.Plug.CurrentUser
   end
 
   scope "/api", TodoApiWeb do

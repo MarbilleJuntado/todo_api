@@ -7,15 +7,15 @@ defmodule TodoApiWeb.TaskController do
   action_fallback TodoApiWeb.FallbackController
 
   def index(conn, _params) do
-    tasks = Tasks.list_tasks()
+    user = Guardian.Plug.current_resource(conn)
+    tasks = Tasks.list_tasks(user.id)
     render(conn, :index, tasks: tasks)
   end
 
   def create(conn, %{"task" => task_params}) do
     user = Guardian.Plug.current_resource(conn)
-    task_params = Map.put(task_params, "user_id", user.id)
 
-    with {:ok, %Task{} = task} <- Tasks.create_task(task_params) do
+    with {:ok, %Task{} = task} <- Tasks.create_task(user.id, task_params) do
       conn
       |> put_status(:created)
       |> put_resp_header("location", ~p"/api/tasks/#{task}")
@@ -24,7 +24,9 @@ defmodule TodoApiWeb.TaskController do
   end
 
   def show(conn, %{"id" => id}) do
-    case Tasks.get_task(id) do
+    user = Guardian.Plug.current_resource(conn)
+
+    case Tasks.get_task(user.id, id) do
       %Task{} = task ->
         render(conn, :show, task: task)
 
@@ -34,20 +36,20 @@ defmodule TodoApiWeb.TaskController do
   end
 
   def update(conn, %{"id" => id, "task" => task_params}) do
-    task = Tasks.get_task!(id)
+    user = Guardian.Plug.current_resource(conn)
 
-    with {:ok, %Task{} = task} <- Tasks.update_task(task, task_params) do
+    with %Task{} = task <- Tasks.get_task(user.id, id),
+         {:ok, %Task{} = task} <- Tasks.update_task(task, task_params) do
       render(conn, :show, task: task)
     end
   end
 
   def delete(conn, %{"id" => id}) do
-    with %Task{} = task <- Tasks.get_task(id),
+    user = Guardian.Plug.current_resource(conn)
+
+    with %Task{} = task <- Tasks.get_task(user.id, id),
          {:ok, %Task{}} <- Tasks.delete_task(task) do
       send_resp(conn, :no_content, "")
-    else
-      nil -> {:error, :not_found}
-      _ -> {:error, :internal_server_error}
     end
   end
 end

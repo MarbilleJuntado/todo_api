@@ -20,4 +20,9 @@ defmodule TodoApi.Tasks.Task do
     |> cast(attrs, [:title, :description, :position, :user_id])
     |> validate_required([:title, :description, :position, :user_id])
   end
+
+  def update_changeset(task, attrs) do
+    task
+    |> cast(attrs, [:title, :description])
+  end
 end

@@ -20,7 +20,7 @@ defmodule TodoApiWeb.AuthControllerTest do
       conn = post(conn, ~p"/api/auth/register", @create_attrs)
       assert %{"id" => id} = json_response(conn, 201)["data"]
 
-      assert user = Accounts.get_user!(id)
+      assert user = Accounts.get_user(id)
       assert user.username == "some username"
       assert true == Argon2.verify_pass("some password", user.hashed_password)
     end

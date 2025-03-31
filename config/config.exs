@@ -27,6 +27,11 @@ config :todo_api, TodoApi.Guardian,
   issuer: "todo_api",
   secret_key: System.get_env("GUARDIAN_SECRET_KEY")
 
+# Dictator config
+config :dictator,
+  ecto_repo: TodoApi.Repo,
+  unauthorized_handler: TodoApiWeb.Authorization.UnauthorizedHandlers
+
 # Configures the mailer
 #
 # By default it uses the "Local" adapter which stores the emails
