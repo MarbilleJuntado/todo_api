@@ -6,14 +6,16 @@ defmodule TodoApiWeb.TaskController do
 
   action_fallback TodoApiWeb.FallbackController
 
+  plug Dictator, only: [:show, :update, :delete]
+
   def index(conn, _params) do
-    user = Guardian.Plug.current_resource(conn)
+    user = conn.assigns.current_user
     tasks = Tasks.list_tasks(user.id)
     render(conn, :index, tasks: tasks)
   end
 
   def create(conn, %{"task" => task_params}) do
-    user = Guardian.Plug.current_resource(conn)
+    user = conn.assigns.current_user
 
     with {:ok, %Task{} = task} <- Tasks.create_task(user.id, task_params) do
       conn
@@ -24,9 +26,7 @@ defmodule TodoApiWeb.TaskController do
   end
 
   def show(conn, %{"id" => id}) do
-    user = Guardian.Plug.current_resource(conn)
-
-    case Tasks.get_task(user.id, id) do
+    case Tasks.get_task(id) do
       %Task{} = task ->
         render(conn, :show, task: task)
 
@@ -36,18 +36,14 @@ defmodule TodoApiWeb.TaskController do
   end
 
   def update(conn, %{"id" => id, "task" => task_params}) do
-    user = Guardian.Plug.current_resource(conn)
-
-    with %Task{} = task <- Tasks.get_task(user.id, id),
+    with %Task{} = task <- Tasks.get_task(id),
          {:ok, %Task{} = task} <- Tasks.update_task(task, task_params) do
       render(conn, :show, task: task)
     end
   end
 
   def delete(conn, %{"id" => id}) do
-    user = Guardian.Plug.current_resource(conn)
-
-    with %Task{} = task <- Tasks.get_task(user.id, id),
+    with %Task{} = task <- Tasks.get_task(id),
          {:ok, %Task{}} <- Tasks.delete_task(task) do
       send_resp(conn, :no_content, "")
     end

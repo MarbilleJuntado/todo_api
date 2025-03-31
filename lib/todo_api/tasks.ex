@@ -14,7 +14,7 @@ defmodule TodoApi.Tasks do
     Repo.all(query)
   end
 
-  def get_task(user_id, id), do: Repo.get_by(Task, user_id: user_id, id: id)
+  def get_task(id), do: Repo.get(Task, id)
 
   def create_task(user_id, attrs \\ %{}) do
     last_position_query = from t in Task, where: t.user_id == ^user_id, select: max(t.position)

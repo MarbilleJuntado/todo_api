@@ -29,8 +29,8 @@ defmodule TodoApi.TasksTest do
       assert Tasks.list_tasks(user2.id) == [task2]
     end
 
-    test "get_task/2 returns the task with given id", %{user: user, task: task} do
-      assert Tasks.get_task(user.id, task.id) == task
+    test "get_task/2 returns the task with given id", %{task: task} do
+      assert Tasks.get_task(task.id) == task
     end
 
     test "create_task/1 with valid data creates a task", %{user: user} do
@@ -60,14 +60,14 @@ defmodule TodoApi.TasksTest do
       assert task.title == "some updated title"
     end
 
-    test "update_task/2 with invalid data returns error changeset", %{user: user, task: task} do
+    test "update_task/2 with invalid data returns error changeset", %{task: task} do
       assert {:error, %Ecto.Changeset{}} = Tasks.update_task(task, @invalid_attrs)
-      assert task == Tasks.get_task(user.id, task.id)
+      assert task == Tasks.get_task(task.id)
     end
 
-    test "delete_task/1 deletes the task", %{user: user, task: task} do
+    test "delete_task/1 deletes the task", %{task: task} do
       assert {:ok, %Task{}} = Tasks.delete_task(task)
-      refute Tasks.get_task(user.id, task.id)
+      refute Tasks.get_task(task.id)
     end
   end
 end
