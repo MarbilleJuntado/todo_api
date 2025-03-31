@@ -84,6 +84,24 @@ defmodule TodoApiWeb.TaskControllerTest do
     end
   end
 
+  describe "show task" do
+    test "renders task when user is authenticated", %{conn: conn, task: %Task{id: id} = task} do
+      conn = get(conn, ~p"/api/tasks/#{task}")
+
+      assert %{"id" => ^id} = json_response(conn, 200)["data"]
+    end
+
+    test "renders errors when task does not exist", %{conn: conn} do
+      conn = get(conn, ~p"/api/tasks/#{Ecto.UUID.generate()}")
+      assert json_response(conn, 404)
+    end
+
+    test "renders errors when user is not authenticated", %{unauth_conn: conn, task: task} do
+      conn = get(conn, ~p"/api/tasks/#{task}", task: @update_attrs)
+      assert json_response(conn, 401)
+    end
+  end
+
   describe "update task" do
     test "renders task when data is valid and user is authenticated", %{
       conn: conn,
@@ -118,9 +136,8 @@ defmodule TodoApiWeb.TaskControllerTest do
       conn = delete(conn, ~p"/api/tasks/#{task}")
       assert response(conn, 204)
 
-      assert_error_sent 404, fn ->
-        get(conn, ~p"/api/tasks/#{task}")
-      end
+      conn = get(conn, ~p"/api/tasks/#{task}")
+      assert json_response(conn, 404)
     end
 
     test "renders errors when user is not authenticated", %{unauth_conn: conn, task: task} do

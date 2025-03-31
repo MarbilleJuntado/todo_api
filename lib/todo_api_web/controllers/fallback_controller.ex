@@ -20,4 +20,11 @@ defmodule TodoApiWeb.FallbackController do
     |> put_view(html: TodoApiWeb.ErrorHTML, json: TodoApiWeb.ErrorJSON)
     |> render(:"422")
   end
+
+  def call(conn, _) do
+    conn
+    |> put_status(:internal_server_error)
+    |> put_view(html: TodoApiWeb.ErrorHTML, json: TodoApiWeb.ErrorJSON)
+    |> render(:"500")
+  end
 end

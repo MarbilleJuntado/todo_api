@@ -24,8 +24,13 @@ defmodule TodoApiWeb.TaskController do
   end
 
   def show(conn, %{"id" => id}) do
-    task = Tasks.get_task!(id)
-    render(conn, :show, task: task)
+    case Tasks.get_task(id) do
+      %Task{} = task ->
+        render(conn, :show, task: task)
+
+      _ ->
+        {:error, :not_found}
+    end
   end
 
   def update(conn, %{"id" => id, "task" => task_params}) do
@@ -37,10 +42,12 @@ defmodule TodoApiWeb.TaskController do
   end
 
   def delete(conn, %{"id" => id}) do
-    task = Tasks.get_task!(id)
-
-    with {:ok, %Task{}} <- Tasks.delete_task(task) do
+    with %Task{} = task <- Tasks.get_task(id),
+         {:ok, %Task{}} <- Tasks.delete_task(task) do
       send_resp(conn, :no_content, "")
+    else
+      nil -> {:error, :not_found}
+      _ -> {:error, :internal_server_error}
     end
   end
 end
