@@ -28,6 +28,7 @@ defmodule TodoApiWeb.Router do
 
     resources "/users", UserController, only: [:show, :update]
     resources "/tasks", TaskController, except: [:new, :edit]
+    post "/tasks/:id/reorder", TaskController, :reorder
   end
 
   # Enable LiveDashboard and Swoosh mailbox preview in development

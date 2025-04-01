@@ -1,6 +1,5 @@
 defmodule TodoApiWeb.UserControllerTest do
-  use TodoApiWeb.ConnCase
-  use ExUnit.Case, async: true
+  use TodoApiWeb.ConnCase, async: true
 
   alias TodoApi.Accounts
   alias TodoApi.Accounts.User

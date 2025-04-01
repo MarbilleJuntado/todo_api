@@ -14,6 +14,7 @@ defmodule TodoApi.Application do
       {Phoenix.PubSub, name: TodoApi.PubSub},
       # Start the Finch HTTP client for sending emails
       {Finch, name: TodoApi.Finch},
+      TodoApi.RebalanceWorker,
       # Start a worker by calling: TodoApi.Worker.start_link(arg)
       # {TodoApi.Worker, arg},
       # Start to serve requests, typically the last entry

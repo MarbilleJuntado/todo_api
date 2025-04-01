@@ -6,7 +6,7 @@ defmodule TodoApiWeb.TaskController do
 
   action_fallback TodoApiWeb.FallbackController
 
-  plug Dictator, only: [:show, :update, :delete]
+  plug Dictator, only: [:show, :update, :delete, :reorder]
 
   def index(conn, _params) do
     user = conn.assigns.current_user
@@ -46,6 +46,13 @@ defmodule TodoApiWeb.TaskController do
     with %Task{} = task <- Tasks.get_task(id),
          {:ok, %Task{}} <- Tasks.delete_task(task) do
       send_resp(conn, :no_content, "")
+    end
+  end
+
+  def reorder(conn, %{"id" => id} = params) do
+    with %Task{} = task <- Tasks.get_task(id),
+         {:ok, %Task{} = task} <- Tasks.reorder_task(task, params) do
+      render(conn, :show, task: task)
     end
   end
 end

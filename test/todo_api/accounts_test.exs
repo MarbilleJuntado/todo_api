@@ -1,6 +1,5 @@
 defmodule TodoApi.AccountsTest do
-  use TodoApi.DataCase
-  use ExUnit.Case, async: true
+  use TodoApi.DataCase, async: true
 
   alias TodoApi.Accounts
 

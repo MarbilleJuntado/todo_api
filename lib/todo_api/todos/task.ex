@@ -18,11 +18,17 @@ defmodule TodoApi.Tasks.Task do
   def changeset(task, attrs) do
     task
     |> cast(attrs, [:title, :description, :position, :user_id])
-    |> validate_required([:title, :description, :position, :user_id])
+    |> validate_required([:title, :position, :user_id])
   end
 
   def update_changeset(task, attrs) do
     task
     |> cast(attrs, [:title, :description])
+  end
+
+  def reorder_changeset(task, attrs) do
+    task
+    |> cast(attrs, [:position])
+    |> validate_required([:position])
   end
 end

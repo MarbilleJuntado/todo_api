@@ -1,6 +1,5 @@
 defmodule TodoApiWeb.TaskControllerTest do
-  use TodoApiWeb.ConnCase
-  use ExUnit.Case, async: true
+  use TodoApiWeb.ConnCase, async: true
 
   alias TodoApi.Accounts
   alias TodoApi.Tasks
@@ -192,6 +191,53 @@ defmodule TodoApiWeb.TaskControllerTest do
 
     test "renders errors when user is unauthorized", %{conn: conn, task2: task2} do
       conn = delete(conn, ~p"/api/tasks/#{task2}")
+      assert json_response(conn, 401)
+    end
+  end
+
+  describe "reorder task" do
+    @describetag :reorder
+
+    setup do
+      {:ok, user} = Accounts.create_user(%{"username" => "reorderer", "password" => "123"})
+
+      {:ok, token, _} = TodoApi.Guardian.encode_and_sign(user)
+      auth_conn = build_conn() |> put_req_header("authorization", "Bearer #{token}")
+
+      tasks =
+        for i <- 1..5 do
+          {:ok, task} = Tasks.create_task(user.id, %{"title" => "Task #{i}"})
+          task
+        end
+
+      [user: user, conn: auth_conn, tasks: tasks]
+    end
+
+    test "reorders a task between two others when user is authenticated and authorized", %{
+      conn: conn,
+      tasks: [_, t2, t3, _, t5]
+    } do
+      reorder_payload = %{
+        "before_task_id" => t2.id,
+        "after_task_id" => t3.id
+      }
+
+      conn = post(conn, "/api/tasks/#{t5.id}/reorder", reorder_payload)
+
+      assert json_response(conn, 200)["data"]["id"] == t5.id
+
+      updated = Tasks.get_task(t5.id)
+      assert Decimal.compare(updated.position, t2.position) == :gt
+      assert Decimal.compare(updated.position, t3.position) == :lt
+    end
+
+    test "renders errors when user is not authenticated", %{unauth_conn: conn, tasks: [task | _]} do
+      conn = post(conn, ~p"/api/tasks/#{task}/reorder", %{})
+      assert json_response(conn, 401)
+    end
+
+    test "renders errors when user is unauthorized", %{conn: conn, task2: task} do
+      conn = post(conn, ~p"/api/tasks/#{task}/reorder", %{})
       assert json_response(conn, 401)
     end
   end
