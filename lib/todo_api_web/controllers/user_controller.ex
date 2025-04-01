@@ -3,7 +3,7 @@ defmodule TodoApiWeb.UserController do
 
   alias TodoApi.Accounts
 
-  plug Dictator
+  plug Dictator, policy: TodoApiWeb.Policies.UserPolicy
 
   action_fallback TodoApiWeb.FallbackController
 

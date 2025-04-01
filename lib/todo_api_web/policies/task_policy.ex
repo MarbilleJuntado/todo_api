@@ -1,4 +1,4 @@
-defmodule TodoApiWeb.Policies.Task do
+defmodule TodoApiWeb.Policies.TaskPolicy do
   alias TodoApi.Tasks
   alias TodoApi.Tasks.Task
   alias TodoApi.Accounts.User

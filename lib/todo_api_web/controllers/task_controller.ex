@@ -6,7 +6,7 @@ defmodule TodoApiWeb.TaskController do
 
   action_fallback TodoApiWeb.FallbackController
 
-  plug Dictator, only: [:show, :update, :delete, :reorder]
+  plug Dictator, policy: TodoApiWeb.Policies.TaskPolicy, only: [:show, :update, :delete, :reorder]
 
   def index(conn, _params) do
     user = conn.assigns.current_user

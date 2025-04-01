@@ -1,4 +1,4 @@
-defmodule TodoApiWeb.Policies.User do
+defmodule TodoApiWeb.Policies.UserPolicy do
   alias TodoApi.Accounts.User
 
   use Dictator.Policies.EctoSchema, for: User
