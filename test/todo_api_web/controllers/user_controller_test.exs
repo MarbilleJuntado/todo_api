@@ -4,15 +4,21 @@ defmodule TodoApiWeb.UserControllerTest do
   alias TodoApi.Accounts
   alias TodoApi.Accounts.User
 
+  @current_password "somePassword1"
   @update_attrs %{
-    username: "some updated username",
-    password: "some updated password"
+    username: "someUpdatedUsername",
+    password: "someUpdatedPassword1",
+    current_password: @current_password
   }
-  @invalid_attrs %{username: 1234, password: 5678}
+  @invalid_attrs %{
+    username: 1234,
+    password: 5678,
+    current_password: @current_password
+  }
 
   setup %{conn: conn} do
-    {:ok, user} = Accounts.create_user(%{"username" => "test", "password" => "1234"})
-    {:ok, user2} = Accounts.create_user(%{"username" => "test2", "password" => "5678"})
+    {:ok, user} = Accounts.create_user(%{"username" => "test1", "password" => @current_password})
+    {:ok, user2} = Accounts.create_user(%{"username" => "test2", "password" => "somePassword2"})
 
     {:ok, token, _} = TodoApi.Guardian.encode_and_sign(user)
 
@@ -23,7 +29,12 @@ defmodule TodoApiWeb.UserControllerTest do
 
     unauth_conn = put_req_header(conn, "accept", "application/json")
 
-    {:ok, conn: auth_conn, unauth_conn: unauth_conn, user: user, user2: user2}
+    {:ok,
+     conn: auth_conn,
+     unauth_conn: unauth_conn,
+     user: user,
+     user2: user2,
+     current_password: "somePassword1"}
   end
 
   describe "show user" do
@@ -66,12 +77,12 @@ defmodule TodoApiWeb.UserControllerTest do
 
       assert %{
                "id" => ^id,
-               "username" => "some updated username"
+               "username" => "someUpdatedUsername"
              } = json_response(conn, 200)["data"]
 
       assert user = Accounts.get_user(id)
-      assert user.username == "some updated username"
-      assert true == Argon2.verify_pass("some updated password", user.hashed_password)
+      assert user.username == "someUpdatedUsername"
+      assert true == Argon2.verify_pass("someUpdatedPassword1", user.hashed_password)
     end
 
     test "renders errors when data is invalid", %{conn: conn, user: user} do
@@ -89,6 +100,13 @@ defmodule TodoApiWeb.UserControllerTest do
       conn = put(conn, ~p"/api/users/#{user2}", user: @update_attrs)
 
       assert json_response(conn, 401)
+    end
+
+    test "renders errors when current_password is wrong", %{conn: conn, user: user} do
+      attrs = Map.put(@update_attrs, :current_password, "wrongPassword")
+      conn = put(conn, ~p"/api/users/#{user}", user: attrs)
+
+      assert json_response(conn, 403)
     end
   end
 end

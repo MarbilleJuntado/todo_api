@@ -16,8 +16,11 @@ defmodule TodoApiWeb.TaskControllerTest do
   @invalid_attrs %{description: 456, title: 789}
 
   setup %{conn: conn} do
-    {:ok, user} = Accounts.create_user(%{"username" => "test", "password" => "1234"})
-    {:ok, user2} = Accounts.create_user(%{"username" => "test2", "password" => "5678"})
+    {:ok, user} =
+      Accounts.create_user(%{"username" => "someUsername", "password" => "somePassword1"})
+
+    {:ok, user2} =
+      Accounts.create_user(%{"username" => "someUsername2", "password" => "somePassword2"})
 
     {:ok, task} =
       Tasks.create_task(user.id, %{
@@ -199,7 +202,8 @@ defmodule TodoApiWeb.TaskControllerTest do
     @describetag :reorder
 
     setup do
-      {:ok, user} = Accounts.create_user(%{"username" => "reorderer", "password" => "123"})
+      {:ok, user} =
+        Accounts.create_user(%{"username" => "someUsername3", "password" => "somePassword3"})
 
       {:ok, token, _} = TodoApi.Guardian.encode_and_sign(user)
       auth_conn = build_conn() |> put_req_header("authorization", "Bearer #{token}")

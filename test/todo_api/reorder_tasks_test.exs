@@ -3,7 +3,8 @@ defmodule TodoApi.Tasks.ReorderTasksTest do
   alias TodoApi.{Accounts, Tasks}
 
   setup do
-    {:ok, user} = Accounts.create_user(%{"username" => "reorder_user", "password" => "123"})
+    {:ok, user} =
+      Accounts.create_user(%{"username" => "someUsername", "password" => "somePassword1"})
 
     # Create 5 tasks with well-spaced positions
     tasks =

@@ -6,8 +6,8 @@ defmodule TodoApiWeb.AuthControllerTest do
   alias TodoApi.Accounts
 
   @create_attrs %{
-    username: "some username",
-    password: "some password"
+    username: "someUsername",
+    password: "somePassword1"
   }
   @invalid_attrs %{username: 1234, password: 5678}
 
@@ -21,8 +21,8 @@ defmodule TodoApiWeb.AuthControllerTest do
       assert %{"id" => id} = json_response(conn, 201)["data"]
 
       assert user = Accounts.get_user(id)
-      assert user.username == "some username"
-      assert true == Argon2.verify_pass("some password", user.hashed_password)
+      assert user.username == "someUsername"
+      assert true == Argon2.verify_pass("somePassword1", user.hashed_password)
     end
 
     test "renders error when username has already been taken", %{conn: conn} do
@@ -37,6 +37,18 @@ defmodule TodoApiWeb.AuthControllerTest do
       conn = post(conn, ~p"/api/auth/register", @invalid_attrs)
       assert json_response(conn, 422)["errors"] != %{}
     end
+
+    test "renders errors when username is invalid format", %{conn: conn} do
+      attrs = Map.put(@create_attrs, :username, "some username")
+      conn = post(conn, ~p"/api/auth/register", attrs)
+      assert json_response(conn, 422)["errors"] != %{}
+    end
+
+    test "renders errors when password is invalid format", %{conn: conn} do
+      attrs = Map.put(@create_attrs, :password, "pass")
+      conn = post(conn, ~p"/api/auth/register", attrs)
+      assert json_response(conn, 422)["errors"] != %{}
+    end
   end
 
   describe "login user" do
@@ -48,7 +60,7 @@ defmodule TodoApiWeb.AuthControllerTest do
 
     test "logs in successfully when credentials are valid", %{conn: conn, user: user} do
       conn =
-        post(conn, ~p"/api/auth/login", %{username: user.username, password: "some password"})
+        post(conn, ~p"/api/auth/login", %{username: user.username, password: "somePassword1"})
 
       assert %{"id" => id, "username" => username, "token" => _token} = json_response(conn, 200)
       assert id == user.id
