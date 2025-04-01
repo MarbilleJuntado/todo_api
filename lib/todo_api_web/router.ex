@@ -19,6 +19,8 @@ defmodule TodoApiWeb.Router do
   scope "/api", TodoApiWeb do
     pipe_through :api
 
+    get "/info", InfoController, :info
+
     post "/auth/register", AuthController, :register
     post "/auth/login", AuthController, :login
   end
