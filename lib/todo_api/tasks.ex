@@ -17,15 +17,32 @@ defmodule TodoApi.Tasks do
   def get_task(id), do: Repo.get(Task, id)
 
   def create_task(user_id, attrs \\ %{}) do
-    last_position_query = from t in Task, where: t.user_id == ^user_id, select: max(t.position)
-    last_position = Repo.one(last_position_query) || "0.0"
+    # flag to check if task is to be added at the top of the list;
+    # otherwise, add new task to bottom
+    top? = Map.get(attrs, "top?") || false
+
+    base_query =
+      case top? do
+        true -> from t in Task, where: t.user_id == ^user_id, select: min(t.position)
+        false -> from t in Task, where: t.user_id == ^user_id, select: max(t.position)
+      end
+
+    default = if top?, do: Decimal.new("1.0"), else: Decimal.new("0.0")
+    base = Repo.one(base_query) || default
+
+    new_position =
+      if top? do
+        Decimal.sub(base, "1.0")
+      else
+        Decimal.add(base, "1.0")
+      end
 
     changeset =
       Task.changeset(
         %Task{},
         Map.merge(attrs, %{
           "user_id" => user_id,
-          "position" => Decimal.add(last_position, "1.0")
+          "position" => new_position
         })
       )
 

@@ -32,16 +32,29 @@ defmodule TodoApi.TasksTest do
       assert Tasks.get_task(task.id) == task
     end
 
-    test "create_task/1 with valid data creates a task", %{user: user} do
+    test "create_task/1 with valid data creates a task", %{user: user, task: task} do
       valid_attrs = %{
         "description" => "some description",
         "title" => "some title"
       }
 
-      assert {:ok, %Task{} = task} = Tasks.create_task(user.id, valid_attrs)
-      assert task.position == Decimal.new("2.0")
-      assert task.description == "some description"
-      assert task.title == "some title"
+      assert {:ok, %Task{} = new_task} = Tasks.create_task(user.id, valid_attrs)
+      assert new_task.description == "some description"
+      assert new_task.title == "some title"
+      assert Decimal.compare(new_task.position, task.position) == :gt
+    end
+
+    test "create_task/1 with valid data adds a task to top of list", %{user: user, task: task} do
+      valid_attrs = %{
+        "description" => "some description",
+        "title" => "some title",
+        "top?" => true
+      }
+
+      assert {:ok, %Task{} = new_task} = Tasks.create_task(user.id, valid_attrs)
+      assert [first_task_on_list | _] = Tasks.list_tasks(user.id)
+      assert new_task == first_task_on_list
+      assert Decimal.compare(new_task.position, task.position) == :lt
     end
 
     test "create_task/1 with invalid data returns error changeset", %{user: user} do
