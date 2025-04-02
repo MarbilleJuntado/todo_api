@@ -8,8 +8,9 @@ defmodule TodoApi.Tasks do
 
   alias TodoApi.Tasks.Task
 
-  def list_tasks(user_id) do
-    query = from t in Task, where: t.user_id == ^user_id, order_by: t.position
+  def list_tasks(user_id, opts \\ []) do
+    limit = Keyword.get(opts, :limit) || 100
+    query = from t in Task, where: t.user_id == ^user_id, order_by: t.position, limit: ^limit
 
     Repo.all(query)
   end
